@@ -61,4 +61,6 @@ services:
       - ${LIZMAP_PORT}:8080
     depends_on:
       - lizmap
+    restart: unless-stopped
+
 
