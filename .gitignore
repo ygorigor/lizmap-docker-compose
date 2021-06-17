@@ -22,6 +22,12 @@
 /lizmap/etc/mainconfig.d/*.ini.php
 /lizmap/etc/profiles.d/*.ini.php
 
+/lizmap/etc/self-signed.conf
+/lizmap/etc/ssl-params.conf
+/lizmap/etc/nginx-selfsigned.crt
+/lizmap/etc/nginx-selfsigned.key
+/lizmap/etc/dhparam.pem
+
 
 
 *.qgs~
