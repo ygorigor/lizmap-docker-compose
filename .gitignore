@@ -11,6 +11,8 @@
 !/lizmap/var/lizmap-my-packages
 
 /lizmap/var/lizmap-modules/*
+/lizmap/instances/*
+/lizmap/plugins/*
 /lizmap/var/lizmap-my-packages/*
 
 !/lizmap/var/lizmap-modules/README.md
