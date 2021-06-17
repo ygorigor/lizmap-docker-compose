@@ -31,11 +31,12 @@ services:
       QGSRV_CACHE_SIZE: '20'
       QGSRV_CACHE_ROOTDIR: /srv/projects
       QGSRV_USER: ${LIZMAP_USER_ID}:${LIZMAP_USER_GID}
-      QGSRV_LOGGING_LEVEL: DEBUG
+      QGSRV_LOGGING_LEVEL: INFO
       QGSRV_SERVER_WORKERS: ${QGIS_MAP_WORKERS}
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
       QGSRV_DISABLE_GETPRINT: '1'
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
+      QGSRV_SERVER_RESTARTMON: /srv/projects/drm/drm.qgs
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis

@@ -27,6 +27,7 @@
 /lizmap/etc/nginx-selfsigned.crt
 /lizmap/etc/nginx-selfsigned.key
 /lizmap/etc/dhparam.pem
+/lizmap/etc/pg_service.conf
 
 
 
