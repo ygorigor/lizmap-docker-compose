@@ -72,3 +72,22 @@ services:
     depends_on:
       - lizmap
     restart: unless-stopped
+  postfix:
+    image: juanluisbaptiste/postfix:latest
+    container_name: mail
+    environment:
+      SMTP_SERVER: '192.168.2.8'
+      SMTP_PORT : 27
+      SMTP_USERNAME_FILE: /secret/mail_username.conf
+      SMTP_PASSWORD_FILE: /secret/mail_password.conf
+      SERVER_HOSTNAME: 'snfr.md'
+      SMTP_NETWORKS: '172.20.0.0/16, 192.168.2.0/24'
+      OVERWRITE_FROM: 'lizmap@snfr.md'
+      DEBUG: 'no'
+    ports:
+      - 127.0.0.1:25:25
+    restart: unless-stopped
+    volumes:
+     - "/etc/localtime:/etc/localtime:ro"
+     - ${LIZMAP_DIR}/instances/mail_username.conf:/secret/mail_username.conf
+     - ${LIZMAP_DIR}/instances/mail_password.conf:/secret/mail_password.conf
