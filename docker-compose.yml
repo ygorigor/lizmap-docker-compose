@@ -13,6 +13,7 @@ services:
       LIZMAP_CONFIG_INCLUDE: /srv/etc
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGPASSFILE: /srv/etc/pgpass.conf
+      PHP_INI: 'sendmail_path = /usr/sbin/sendmail -S mail -t -i'
     volumes:
       - ${LIZMAP_DIR}/instances:/srv/projects
       - ${LIZMAP_DIR}/var/lizmap-theme-config:/www/lizmap/var/lizmap-theme-config
@@ -68,7 +69,7 @@ services:
       - ${LIZMAP_DIR}/var/nginx-cache:/var/cache/nginx
       - ${LIZMAP_DIR}:/srv/lizmap
     ports:
-      - ${LIZMAP_PORT}:8080
+      - ${LIZMAP_PORT}:443
     depends_on:
       - lizmap
     restart: unless-stopped
