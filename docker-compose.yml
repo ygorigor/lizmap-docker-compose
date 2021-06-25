@@ -42,6 +42,7 @@ services:
       QGSRV_DISABLE_GETPRINT: '1'
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       QGSRV_SERVER_RESTARTMON: /srv/projects/drm/drm.qgs
+      QGSRV_MANAGEMENT_ENABLED: 'yes'
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis
@@ -88,8 +89,6 @@ services:
       SMTP_NETWORKS: '172.20.0.0/16, 192.168.2.0/24'
       OVERWRITE_FROM: 'lizmap@snfr.md'
       DEBUG: 'no'
-    ports:
-      - 127.0.0.1:25:25
     restart: unless-stopped
     volumes:
      - "/etc/localtime:/etc/localtime:ro"
