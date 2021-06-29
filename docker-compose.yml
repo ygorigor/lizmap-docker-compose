@@ -24,6 +24,7 @@ services:
       - ${LIZMAP_DIR}/var/lizmap-modules:/www/lizmap/lizmap-modules
       - ${LIZMAP_DIR}/var/lizmap-my-packages:/www/lizmap/my-packages
       - ${LIZMAP_DIR}/etc/php_customconfig.ini:/etc/php7/conf.d/php_customconfig.ini
+      - "/etc/localtime:/etc/localtime:ro"
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfil:/www/lizmap/lizmap-modules/altiProfil
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin:/www/lizmap/lizmap-modules/altiProfilAdmin
     command:
@@ -52,6 +53,7 @@ services:
       - ${LIZMAP_DIR}/plugins:/srv/plugins
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
       - ${OWS_PORT}:8080
     restart: unless-stopped
@@ -72,6 +74,7 @@ services:
       - ${LIZMAP_DIR}/var/log/nginx:/var/log/nginx
       - ${LIZMAP_DIR}/var/nginx-cache:/var/cache/nginx
       - ${LIZMAP_DIR}:/srv/lizmap
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
       - ${LIZMAP_PORT}:443
     depends_on:
