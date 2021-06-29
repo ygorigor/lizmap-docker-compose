@@ -13,7 +13,6 @@ services:
       LIZMAP_CONFIG_INCLUDE: /srv/etc
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGPASSFILE: /srv/etc/pgpass.conf
-      PHP_INI: 'sendmail_path = /usr/sbin/sendmail -S mail -t -i'
     volumes:
       - ${LIZMAP_DIR}/instances:/srv/projects
       - ${LIZMAP_DIR}/var/lizmap-theme-config:/www/lizmap/var/lizmap-theme-config
@@ -24,6 +23,7 @@ services:
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/var/lizmap-modules:/www/lizmap/lizmap-modules
       - ${LIZMAP_DIR}/var/lizmap-my-packages:/www/lizmap/my-packages
+      - ${LIZMAP_DIR}/etc/php_customconfig.ini:/etc/php7/conf.d/php_customconfig.ini
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfil:/www/lizmap/lizmap-modules/altiProfil
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin:/www/lizmap/lizmap-modules/altiProfilAdmin
     command:
