@@ -42,7 +42,7 @@ services:
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
       QGSRV_DISABLE_GETPRINT: '1'
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
-      QGSRV_SERVER_RESTARTMON: /srv/projects/drm/drm.qgs
+      QGSRV_SERVER_RESTARTMON: /srv/plugins
       QGSRV_MANAGEMENT_ENABLED: 'yes'
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
@@ -53,6 +53,9 @@ services:
       - ${LIZMAP_DIR}/plugins:/srv/plugins
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
+      - ${LIZMAP_DIR}/../../lizmap-plugin/lizmap:/srv/plugins/lizmap
+      - ${LIZMAP_DIR}/../../qgis-wfsOutputExtension/wfsOutputExtension:/srv/plugins/wfsOutputExtension
+      - ${LIZMAP_DIR}/../../qgis-atlasprint/atlasprint:/srv/plugins/atlasprint
       - "/etc/localtime:/etc/localtime:ro"
     ports:
       - ${OWS_PORT}:8080
