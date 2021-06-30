@@ -53,7 +53,7 @@ services:
       - ${LIZMAP_DIR}/plugins:/srv/plugins
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
-      - ${LIZMAP_DIR}/../../lizmap-plugin/lizmap:/srv/plugins/lizmap
+#      - ${LIZMAP_DIR}/../../lizmap-plugin/lizmap:/srv/plugins/lizmap
       - ${LIZMAP_DIR}/../../qgis-wfsOutputExtension/wfsOutputExtension:/srv/plugins/wfsOutputExtension
       - ${LIZMAP_DIR}/../../qgis-atlasprint/atlasprint:/srv/plugins/atlasprint
       - "/etc/localtime:/etc/localtime:ro"
@@ -78,6 +78,7 @@ services:
       - ${LIZMAP_DIR}/var/nginx-cache:/var/cache/nginx
       - ${LIZMAP_DIR}:/srv/lizmap
       - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/timezone:/etc/timezone:ro"
     ports:
       - ${LIZMAP_PORT}:443
     depends_on:
