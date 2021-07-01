@@ -64,7 +64,7 @@ services:
     image: redis:5-alpine
     container_name: redis
   web:
-    image: nginx:1
+    image: nginx:1-alpine
     container_name: web
     user: ${LIZMAP_USER_ID}:${LIZMAP_USER_ID}
     volumes:
