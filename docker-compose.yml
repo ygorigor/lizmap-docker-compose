@@ -27,6 +27,7 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfil:/www/lizmap/lizmap-modules/altiProfil
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin:/www/lizmap/lizmap-modules/altiProfilAdmin
+      - ${LIZMAP_DIR}/../../lizmap-pgrouting-module/pgrouting:/www/lizmap/lizmap-modules/pgrouting
     command:
       - php-fpm
     restart: unless-stopped
