@@ -64,6 +64,9 @@ services:
   redis:
     image: redis:5-alpine
     container_name: redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
   web:
     image: nginx:1-alpine
     container_name: web
@@ -85,6 +88,21 @@ services:
     depends_on:
       - lizmap
     restart: unless-stopped
+  postgis:
+    image: 3liz/postgis:${POSTGIS_VERSION}
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - ${POSTGIS_PORT}:5432
+    networks:
+      default:
+        aliases:
+          - ${POSTGIS_ALIAS}
+    profiles:
+      - postgis
+    restart: unless-stopped
   postfix:
     image: juanluisbaptiste/postfix:latest
     container_name: mail
@@ -102,3 +120,9 @@ services:
      - "/etc/localtime:/etc/localtime:ro"
      - ${LIZMAP_DIR}/instances/mail_username.conf:/secret/mail_username.conf
      - ${LIZMAP_DIR}/instances/mail_password.conf:/secret/mail_password.conf
+
+volumes:
+    postgis_data:
+        driver: local
+    redis_data:
+        driver: local
