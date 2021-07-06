@@ -43,6 +43,7 @@ env: dirs
 		echo "POSTGIS_VERSION=$(POSTGIS_VERSION)" >> .env;\
 		echo "POSTGIS_PORT=$(POSTGIS_PORT)" >> .env;\
 		echo "POSTGRES_PASSWORD=$(POSTGRES_PASSWORD)" >> .env;\
+		echo "POSTGIS_ALIAS=$(POSTGIS_ALIAS)" >> .env;\
 	}
 
 #
