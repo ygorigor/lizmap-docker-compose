@@ -44,6 +44,7 @@ services:
       QGSRV_DISABLE_GETPRINT: '1'
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       QGSRV_SERVER_RESTARTMON: /srv/plugins
+      QGSRV_API_ENABLED_LANDING_PAGE: 'yes'
       QGSRV_MANAGEMENT_ENABLED: 'yes'
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
