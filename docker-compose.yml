@@ -41,11 +41,12 @@ services:
       QGSRV_LOGGING_LEVEL: INFO
       QGSRV_SERVER_WORKERS: ${QGIS_MAP_WORKERS}
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
-      QGSRV_DISABLE_GETPRINT: '1'
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       QGSRV_SERVER_RESTARTMON: /srv/plugins
       QGSRV_API_ENABLED_LANDING_PAGE: 'yes'
-      QGSRV_MANAGEMENT_ENABLED: 'yes'
+      QGSRV_TRUST_LAYER_METADATA: 'yes'
+      QGSRV_CACHE_DISABLE_OWSURLS: 'yes'
+      QGSRV_DISABLE_GETPRINT: 'yes'
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis
