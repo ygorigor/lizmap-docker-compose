@@ -7,12 +7,21 @@ services:
       LIZMAP_CACHEREDISDB: '0'
       LIZMAP_CACHEREDISHOST: '192.168.2.12'
       LIZMAP_CACHESTORAGETYPE: redis
+      LIZMAP_CACHEEXPIRATION: '0'
+      LIZMAP_CACHEREDISDB: '0'
+      LIZMAP_CACHEREDISKEYPREFIX: 'lizmap_'
       LIZMAP_HOME: /srv/lizmap
       LIZMAP_USER: ${LIZMAP_USER_ID}
       LIZMAP_WMSSERVERURL: http://map:8080/ows/
       LIZMAP_CONFIG_INCLUDE: /srv/etc
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGPASSFILE: /srv/etc/pgpass.conf
+      PM_MAX_CHILDREN: '70'
+      PM_START_SERVERS: '25'
+      PM_MIN_SPARE_SERVERS: '20'
+      PM_MAX_SPARE_SERVERS: '35'
+      PM_CHILD_PROCESS: 'dynamic'
+      PM_MAX_REQUESTS: '0'
     volumes:
       - ${LIZMAP_DIR}/instances:/srv/projects
       - ${LIZMAP_DIR}/var/lizmap-theme-config:/www/lizmap/var/lizmap-theme-config
@@ -41,12 +50,13 @@ services:
       QGSRV_LOGGING_LEVEL: INFO
       QGSRV_SERVER_WORKERS: ${QGIS_MAP_WORKERS}
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
-      QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
+#      QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       QGSRV_SERVER_RESTARTMON: /srv/plugins
       QGSRV_API_ENABLED_LANDING_PAGE: 'yes'
       QGSRV_TRUST_LAYER_METADATA: 'yes'
       QGSRV_CACHE_DISABLE_OWSURLS: 'yes'
       QGSRV_DISABLE_GETPRINT: 'yes'
+      QGSRV_CACHE_STRICT_CHECK: 'no'
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis
