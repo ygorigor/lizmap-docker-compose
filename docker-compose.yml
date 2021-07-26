@@ -2,16 +2,27 @@ version: '3.8'
 services:
   lizmap:
     image: 3liz/lizmap-web-client:${LIZMAP_VERSION_TAG}
+    container_name: lizmap
     environment:
-      LIZMAP_CACHEREDISDB: '1'
-      LIZMAP_CACHEREDISHOST: redis
+      LIZMAP_CACHEREDISDB: '0'
+      LIZMAP_CACHEREDISHOST: '192.168.2.12'
       LIZMAP_CACHESTORAGETYPE: redis
+      LIZMAP_CACHEEXPIRATION: '0'
+      LIZMAP_CACHEREDISDB: '0'
+      LIZMAP_CACHEREDISKEYPREFIX: 'lizmap_'
       LIZMAP_HOME: /srv/lizmap
       LIZMAP_USER: ${LIZMAP_UID}
       LIZMAP_WMSSERVERURL: http://map:8080/ows/
       LIZMAP_CONFIG_INCLUDE: /srv/etc
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGPASSFILE: /srv/etc/pgpass.conf
+      PM_MAX_CHILDREN: '100'
+      PM_START_SERVERS: '16'
+      PM_MIN_SPARE_SERVERS: '8'
+      PM_MAX_SPARE_SERVERS: '16'
+      PM_CHILD_PROCESS: 'dynamic'
+      PM_MAX_REQUESTS: '0'
+      PM_PROCESS_IDLE_TIMEOUT: '200'
     volumes:
       - ${LIZMAP_PROJECTS}:/srv/projects
       - ${LIZMAP_DIR}/var/lizmap-theme-config:/www/lizmap/var/lizmap-theme-config
@@ -22,62 +33,103 @@ services:
       - ${LIZMAP_DIR}/var/lizmap-modules:/www/lizmap/lizmap-modules
       - ${LIZMAP_DIR}/var/lizmap-my-packages:/www/lizmap/my-packages
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
+      - ${LIZMAP_DIR}/etc/php_customconfig.ini:/etc/php7/conf.d/php_customconfig.ini
+      - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfil:/www/lizmap/lizmap-modules/altiProfil
+      - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin:/www/lizmap/lizmap-modules/altiProfilAdmin
     command:
       - php-fpm
+    depends_on:
+      - map
     restart: unless-stopped
   map:
     image: 3liz/qgis-map-server:${QGIS_VERSION_TAG}
+    container_name: map
     environment:
       QGSRV_CACHE_SIZE: '20'
       QGSRV_CACHE_ROOTDIR: /srv/projects
       QGSRV_USER: ${LIZMAP_UID}:${LIZMAP_GID}
-      QGSRV_LOGGING_LEVEL: DEBUG
+      QGSRV_LOGGING_LEVEL: INFO
       QGSRV_SERVER_WORKERS: ${QGIS_MAP_WORKERS}
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
+      QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis
+      QGSRV_SERVER_TIMEOUT: '60'
+      QGSRV_DISABLE_GETPRINT: '1'
+      QGSRV_API_ENABLED_LANDING_PAGE: '0'
+      QGSRV_TRUST_LAYER_METADATA: '1'
+      QGIS_SERVER_PARALLEL_RENDERING: '1'
     volumes:
       - ${LIZMAP_PROJECTS}:/srv/projects
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
+      - ${LIZMAP_DIR}/plugins:/srv/plugins
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
       - ${OWS_PORT}:8080
     restart: unless-stopped
-  redis:
-    image: redis:5-alpine
-    volumes:
-      - redis_data:/data
+#  redis:
+#    image: redis:5-alpine
+#    container_name: redis
+#    volumes:
+#     - redis_data:/data
   web:
-    image: nginx:1
+    image: nginx:alpine
+    container_name: web
     user: ${LIZMAP_UID}:${LIZMAP_UID}
     volumes:
       - ${LIZMAP_DIR}/etc/nginx.conf:/etc/nginx/nginx.conf
       - ${LIZMAP_DIR}/var/log/nginx:/var/log/nginx
       - ${LIZMAP_DIR}/var/nginx-cache:/var/cache/nginx
       - ${LIZMAP_DIR}:/srv/lizmap
+      - ${LIZMAP_DIR}/etc/self-signed.conf:/etc/nginx/self-signed.conf
+      - ${LIZMAP_DIR}/etc/ssl-params.conf:/etc/nginx/ssl-params.conf
+      - ${LIZMAP_DIR}/etc/nginx-selfsigned.crt:/etc/nginx/nginx-selfsigned.crt
+      - ${LIZMAP_DIR}/etc/nginx-selfsigned.key:/etc/nginx/nginx-selfsigned.key
+      - ${LIZMAP_DIR}/etc/dhparam.pem:/etc/nginx/dhparam.pem
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/timezone:/etc/timezone:ro"
     ports:
-      - ${LIZMAP_PORT}:8080
+      - ${LIZMAP_PORT}:443
     depends_on:
       - lizmap
-  postgis:
-    image: 3liz/postgis:${POSTGIS_VERSION}
-    volumes:
-      - postgis_data:/var/lib/postgresql/data
+    restart: unless-stopped
+#  postgis:
+#    image: 3liz/postgis:${POSTGIS_VERSION}
+#    volumes:
+#      - postgis_data:/var/lib/postgresql/data
+#    environment:
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#   ports:
+#      - ${POSTGIS_PORT}:5432
+#   networks:
+#      default:
+#       aliases:
+#          - ${POSTGIS_ALIAS}
+#   profiles:
+#      - postgis
+  postfix:
+    image: juanluisbaptiste/postfix:latest
+    container_name: mail
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - ${POSTGIS_PORT}:5432
-    networks:
-      default:
-        aliases:
-          - ${POSTGIS_ALIAS}
-    profiles:
-      - postgis
+      SMTP_SERVER: '192.168.2.8'
+      SMTP_PORT : 27
+      SMTP_USERNAME_FILE: /secret/mail_username.conf
+      SMTP_PASSWORD_FILE: /secret/mail_password.conf
+      SERVER_HOSTNAME: 'snfr.md'
+      SMTP_NETWORKS: '172.20.0.0/16, 192.168.2.0/24'
+      OVERWRITE_FROM: 'lizmap@snfr.md'
+      DEBUG: 'no'
+    restart: unless-stopped
+    volumes:
+     - "/etc/localtime:/etc/localtime:ro"
+     - ${LIZMAP_DIR}/instances/mail_username.conf:/secret/mail_username.conf
+     - ${LIZMAP_DIR}/instances/mail_password.conf:/secret/mail_password.conf
 
-volumes:
-    postgis_data:
-        driver: local
-    redis_data:
-        driver: local
+#volumes:
+#    postgis_data:
+#        driver: local
+#    redis_data:
+#       driver: local
 
