@@ -16,13 +16,13 @@ services:
       LIZMAP_CONFIG_INCLUDE: /srv/etc
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGPASSFILE: /srv/etc/pgpass.conf
-      PM_MAX_CHILDREN: '100'
+      PM_MAX_CHILDREN: '200'
       PM_START_SERVERS: '16'
       PM_MIN_SPARE_SERVERS: '8'
       PM_MAX_SPARE_SERVERS: '16'
       PM_CHILD_PROCESS: 'dynamic'
       PM_MAX_REQUESTS: '0'
-      PM_PROCESS_IDLE_TIMEOUT: '200'
+      PM_PROCESS_IDLE_TIMEOUT: '10'
     volumes:
       - ${LIZMAP_PROJECTS}:/srv/projects
       - ${LIZMAP_DIR}/var/lizmap-theme-config:/www/lizmap/var/lizmap-theme-config
@@ -36,10 +36,11 @@ services:
       - ${LIZMAP_DIR}/etc/php_customconfig.ini:/etc/php7/conf.d/php_customconfig.ini
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfil:/www/lizmap/lizmap-modules/altiProfil
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin:/www/lizmap/lizmap-modules/altiProfilAdmin
+      - ${LIZMAP_DIR}/../../lizmap-pgrouting-module/pgrouting:/www/lizmap/lizmap-modules/pgrouting
     command:
       - php-fpm
-    depends_on:
-      - map
+#    depends_on:
+#      - map
     restart: unless-stopped
   map:
     image: 3liz/qgis-map-server:${QGIS_VERSION_TAG}
@@ -53,11 +54,11 @@ services:
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       PGSERVICEFILE: /srv/etc/pg_service.conf
-      PGSPASSFILE: /srv/etc/pgpass.conf
+#      PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis
-      QGSRV_SERVER_TIMEOUT: '60'
+      QGSRV_SERVER_TIMEOUT: '80'
       QGSRV_DISABLE_GETPRINT: '1'
-      QGSRV_API_ENABLED_LANDING_PAGE: '0'
+      QGSRV_API_ENABLED_LANDING_PAGE: '1'
       QGSRV_TRUST_LAYER_METADATA: '1'
       QGIS_SERVER_PARALLEL_RENDERING: '1'
     volumes:
@@ -69,6 +70,8 @@ services:
     ports:
       - ${OWS_PORT}:8080
     restart: unless-stopped
+    profiles: 
+      - donotstart
 #  redis:
 #    image: redis:5-alpine
 #    container_name: redis
@@ -77,11 +80,11 @@ services:
   web:
     image: nginx:alpine
     container_name: web
-    user: ${LIZMAP_UID}:${LIZMAP_UID}
+#    user: ${LIZMAP_UID}:${LIZMAP_UID}
     volumes:
       - ${LIZMAP_DIR}/etc/nginx.conf:/etc/nginx/nginx.conf
-      - ${LIZMAP_DIR}/var/log/nginx:/var/log/nginx
-      - ${LIZMAP_DIR}/var/nginx-cache:/var/cache/nginx
+#      - ${LIZMAP_DIR}/var/log/nginx:/var/log/nginx
+#      - ${LIZMAP_DIR}/var/nginx-cache:/var/cache/nginx
       - ${LIZMAP_DIR}:/srv/lizmap
       - ${LIZMAP_DIR}/etc/self-signed.conf:/etc/nginx/self-signed.conf
       - ${LIZMAP_DIR}/etc/ssl-params.conf:/etc/nginx/ssl-params.conf
@@ -118,7 +121,7 @@ services:
       SMTP_USERNAME_FILE: /secret/mail_username.conf
       SMTP_PASSWORD_FILE: /secret/mail_password.conf
       SERVER_HOSTNAME: 'snfr.md'
-      SMTP_NETWORKS: '172.20.0.0/16, 192.168.2.0/24'
+      SMTP_NETWORKS: '192.168.2.0/24'
       OVERWRITE_FROM: 'lizmap@snfr.md'
       DEBUG: 'no'
     restart: unless-stopped
@@ -133,3 +136,7 @@ services:
 #    redis_data:
 #       driver: local
 
+networks:
+  default:
+    external: true
+    name: qgis-server
