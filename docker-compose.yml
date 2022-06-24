@@ -68,7 +68,6 @@ services:
       - ${LIZMAP_DIR}/plugins:/srv/plugins
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
-      - ${LIZMAP_DIR}/../../qgis-plugins:/srv/plugins
       - "/etc/localtime:/etc/localtime:ro"
     ports:
       - ${OWS_PORT}:8080
