@@ -46,7 +46,7 @@ services:
     image: 3liz/qgis-map-server:${QGIS_VERSION_TAG}
     container_name: map
     environment:
-      QGSRV_CACHE_SIZE: '20'
+      QGSRV_CACHE_SIZE: '50'
       QGSRV_CACHE_ROOTDIR: /srv/projects
       QGSRV_USER: ${LIZMAP_UID}:${LIZMAP_GID}
       QGSRV_LOGGING_LEVEL: INFO
@@ -66,13 +66,13 @@ services:
       - ${LIZMAP_PROJECTS}:/srv/projects
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
-      - ${LIZMAP_DIR}/plugins:/srv/plugins
+      - ${LIZMAP_DIR}/../../qgis-plugins:/srv/plugins
       - "/etc/localtime:/etc/localtime:ro"
-#    ports:
-#      - ${OWS_PORT}:8080
+    ports:
+      - ${OWS_PORT}:8080
     restart: unless-stopped
-    profiles: 
-      - donotstart
+#    profiles: 
+#      - donotstart
 #  redis:
 #    image: redis:5-alpine
 #    container_name: redis
@@ -96,24 +96,27 @@ services:
       - "/etc/timezone:/etc/timezone:ro"
     ports:
       - 8090:8080
+#      - 8085:80
       - ${LIZMAP_PORT}:443
     depends_on:
       - lizmap
     restart: unless-stopped
 #  postgis:
 #    image: 3liz/postgis:${POSTGIS_VERSION}
+#    container_name: postgis
 #    volumes:
 #      - postgis_data:/var/lib/postgresql/data
 #    environment:
 #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#   ports:
+#    ports:
 #      - ${POSTGIS_PORT}:5432
-#   networks:
+#    networks:
 #      default:
 #       aliases:
 #          - ${POSTGIS_ALIAS}
-#   profiles:
+#    profiles:
 #      - postgis
+    restart: unless-stopped
   postfix:
     image: juanluisbaptiste/postfix:latest
     container_name: mail
@@ -131,28 +134,30 @@ services:
      - "/etc/localtime:/etc/localtime:ro"
      - ${LIZMAP_DIR}/instances/mail_username.conf:/secret/mail_username.conf
      - ${LIZMAP_DIR}/instances/mail_password.conf:/secret/mail_password.conf
-  qgis-server:
-    image: opengisch/qgis-server:ltr
-    container_name: qgis-server
-    hostname: qgis-server
-    init: true
-    volumes:
-    - ${LIZMAP_DIR}/instances/:/var/lib/qgis
-    - ${LIZMAP_DIR}/../../qgis-plugins:/io/plugins
-    - "/etc/localtime:/etc/localtime:ro"
-    environment:
-    - SKIP_NGINX=true
-    - QGIS_USER=${LIZMAP_UID}
-    - PGSERVICEFILE=/var/lib/qgis/pg_service.conf
-    - QGIS_SERVER_MAX_THREADS=-1
-    - QGIS_SERVER_TRUST_LAYER_METADATA=true
-    - DEBUG_WFSOUTPUTEXTENSION=false
-    - QGIS_SERVER_LIZMAP_REVEAL_SETTINGS=true
-    restart: unless-stopped
-
-#volumes:
-#    postgis_data:
-#        driver: local
+#  qgis-server:
+#    image: opengisch/qgis-server:ltr
+#    container_name: qgis-server
+#    hostname: qgis-server
+#    init: true
+#    volumes:
+#    - ${LIZMAP_DIR}/instances/:/var/lib/qgis
+#    - ${LIZMAP_DIR}/../../qgis-plugins:/io/plugins
+#    - "/etc/localtime:/etc/localtime:ro"
+#    environment:
+#    - SKIP_NGINX=true
+#   - QGIS_USER=${LIZMAP_UID}
+#    - PGSERVICEFILE=/var/lib/qgis/pg_service.conf
+#    - QGIS_SERVER_MAX_THREADS=-1
+#   - QGIS_SERVER_TRUST_LAYER_METADATA=true
+#    - DEBUG_WFSOUTPUTEXTENSION=false
+#   - QGIS_SERVER_LIZMAP_REVEAL_SETTINGS=true
+#    - QGIS_SERVER_LOG_LEVEL=INFO
+#    restart: unless-stopped
+#    profiles: 
+#      - donotstart
+volumes:
+    postgis_data:
+        driver: local
 #    redis_data:
 #       driver: local
 
