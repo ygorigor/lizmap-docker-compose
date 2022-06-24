@@ -5,10 +5,9 @@
 NAME=lizmap-installer-helper
 VERSION=latest
 
-LIZMAP_VERSION:=3.4
-QGIS_VERSION:=3.16
+LIZMAP_VERSION:=3.5
+QGIS_VERSION:=3.22
 POSTGIS_VERSION:=13-3
-LIZMAP_PLUGIN_VERSION:=3.5.4
 
 INSTALL_DIR:=$(shell pwd)/lizmap
 
@@ -22,14 +21,15 @@ configure:
 	POSTGIS_VERSION=$(POSTGIS_VERSION) \
 	LIZMAP_INSTALL_DIR=$(INSTALL_DIR) \
 	LIZMAP_PLUGIN_VERSION=$(LIZMAP_PLUGIN_VERSION) \
-	./entrypoint.sh configure
-	@cp lizmap/.env ./
-	@echo "Execute 'docker-compose up' to run lizmap"
+	./configure.sh configure
+	@rm -f ./.env
+	@ ln -sf  $(INSTALL_DIR)/.env
+	@echo "Execute 'docker compose up' to run lizmap"
 
 
 clean:
 	@INSTALL_DEST=$(INSTALL_DIR) \
-	./entrypoint.sh clean
+	./configure.sh clean
 
 build-installer:
 	docker build --rm \
@@ -46,6 +46,5 @@ run-installer:
 	-e LIZMAP_INSTALL_DIR=$(INSTALL_DIR) \
 	-v $(INSTALL_DIR):/lizmap \
 	$(NAME):$(VERSION) configure
-
 
 

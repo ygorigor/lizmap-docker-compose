@@ -6,26 +6,15 @@
 
 set -e
 
+scriptdir=$(realpath `dirname $0`)
+
 if [ ! -d $INSTALL_DEST ]; then
     echo "Error: '$INSTALL_DEST' does not exists"
     exit 1
 fi
 
-if [ "$(id -u)" = '0' ]; then
-    export LIZMAP_UID=$(stat -c '%u' $INSTALL_DEST)
-    export LIZMAP_GID=$(stat -c '%g' $INSTALL_DEST)
-    # Warn if the destination is owned by
-    # Root, this may indicates that the directory was created
-    # at binding
-    if [ "$LIZMAP_UID" = '0' ]; then
-        echo "WARNING: Your destination directory is owned by 'root'"
-    else
-        SUEXEC="su-exec $LIZMAP_UID:$LIZMAP_GID"
-    fi
-else
-    export LIZMAP_UID=$(id -u)
-    export LIZMAP_GID=$(id -g)
-fi
+export LIZMAP_UID=$(id -u)
+export LIZMAP_GID=$(id -g)
 
 #
 # Commands
@@ -70,33 +59,14 @@ _makenv() {
 
 
 _install-plugin() {
-    local plugindir=$INSTALL_DEST/plugins/lizmap
-    if [ -d $plugindir ]; then
-        local version=$(cat $plugindir/metadata.txt | grep "version=" |  cut -d '=' -f2)
-        echo "Found installed version $version"
-        if [ ! "$LIZMAP_PLUGIN_VERSION" = "$version" ]; then
-            echo "Removing installed version"
-            rm -rf $plugindir
-        else
-            echo "Installed version match required version"
-            return 0
-        fi
-    fi
-    echo "Installing version $LIZMAP_PLUGIN_VERSION"
-    wget https://github.com/3liz/lizmap-plugin/releases/download/$LIZMAP_PLUGIN_VERSION/lizmap.$LIZMAP_PLUGIN_VERSION.zip \
-        -O lizmap-plugin.zip
-    unzip -qq lizmap-plugin.zip -d lizmap-plugin-$LIZMAP_PLUGIN_VERSION
-    (
-        cd lizmap-plugin-$LIZMAP_PLUGIN_VERSION
-        local files="lizmap/__init__.py lizmap/server lizmap/tooltip.py lizmap/metadata.txt"
-        mkdir $plugindir
-        cp -rLp $files $plugindir/
-    )
-    # Clean up stuff
-    rm -rf lizmap-plugin.zip lizmap-plugin-$LIZMAP_PLUGIN_VERSION
-    # Since we fetche a tag directly from github,
-    # we need to update the version in the metadata.txt
-    chown -R $LIZMAP_UID:$LIZMAP_GID $plugindir
+    local plugindir=$INSTALL_DEST/plugins
+    docker run -it \
+        -u $(id -u):$(id -g) \
+        -e QGSRV_SERVER_PLUGINPATH=/srv/plugins \
+        -v $plugindir:/srv/plugins \
+        -v $scriptdir:/src \
+        --entrypoint /src/install-lizmap-plugin.sh \
+        3liz/qgis-map-server:${QGIS_VERSION_TAG}
 }
 
 

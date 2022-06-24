@@ -45,6 +45,7 @@ services:
   map:
     image: 3liz/qgis-map-server:${QGIS_VERSION_TAG}
     container_name: map
+    command: qgisserver -c /srv/etc/py-qgis-server.conf
     environment:
       QGSRV_CACHE_SIZE: '50'
       QGSRV_CACHE_ROOTDIR: /srv/projects
@@ -64,6 +65,7 @@ services:
       QGIS_SERVER_LIZMAP_REVEAL_SETTINGS: '1'
     volumes:
       - ${LIZMAP_PROJECTS}:/srv/projects
+      - ${LIZMAP_DIR}/plugins:/srv/plugins
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
       - ${LIZMAP_DIR}/../../qgis-plugins:/srv/plugins
