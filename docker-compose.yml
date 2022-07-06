@@ -55,7 +55,6 @@ services:
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       PGSERVICEFILE: /srv/etc/pg_service.conf
-#      PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis
       QGSRV_SERVER_TIMEOUT: '80'
       QGSRV_DISABLE_GETPRINT: '1'
@@ -72,8 +71,6 @@ services:
     ports:
       - ${OWS_PORT}:8080
     restart: unless-stopped
-#    profiles: 
-#      - donotstart
 #  redis:
 #    image: redis:5-alpine
 #    container_name: redis
@@ -97,26 +94,25 @@ services:
       - "/etc/timezone:/etc/timezone:ro"
     ports:
       - 8090:8080
-#      - 8085:80
       - ${LIZMAP_PORT}:443
     depends_on:
       - lizmap
     restart: unless-stopped
-#  postgis:
-#    image: 3liz/postgis:${POSTGIS_VERSION}
-#    container_name: postgis
-#    volumes:
-#      - postgis_data:/var/lib/postgresql/data
-#    environment:
-#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#    ports:
-#      - ${POSTGIS_PORT}:5432
-#    networks:
-#      default:
-#       aliases:
-#          - ${POSTGIS_ALIAS}
-#    profiles:
-#      - postgis
+  postgis:
+    image: 3liz/postgis:${POSTGIS_VERSION}
+    container_name: postgis
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - ${POSTGIS_PORT}:5432
+    networks:
+      default:
+       aliases:
+          - ${POSTGIS_ALIAS}
+    profiles:
+      - postgis
     restart: unless-stopped
   postfix:
     image: juanluisbaptiste/postfix:latest
@@ -135,27 +131,7 @@ services:
      - "/etc/localtime:/etc/localtime:ro"
      - ${LIZMAP_DIR}/instances/mail_username.conf:/secret/mail_username.conf
      - ${LIZMAP_DIR}/instances/mail_password.conf:/secret/mail_password.conf
-#  qgis-server:
-#    image: opengisch/qgis-server:ltr
-#    container_name: qgis-server
-#    hostname: qgis-server
-#    init: true
-#    volumes:
-#    - ${LIZMAP_DIR}/instances/:/var/lib/qgis
-#    - ${LIZMAP_DIR}/../../qgis-plugins:/io/plugins
-#    - "/etc/localtime:/etc/localtime:ro"
-#    environment:
-#    - SKIP_NGINX=true
-#   - QGIS_USER=${LIZMAP_UID}
-#    - PGSERVICEFILE=/var/lib/qgis/pg_service.conf
-#    - QGIS_SERVER_MAX_THREADS=-1
-#   - QGIS_SERVER_TRUST_LAYER_METADATA=true
-#    - DEBUG_WFSOUTPUTEXTENSION=false
-#   - QGIS_SERVER_LIZMAP_REVEAL_SETTINGS=true
-#    - QGIS_SERVER_LOG_LEVEL=INFO
-#    restart: unless-stopped
-#    profiles: 
-#      - donotstart
+
 volumes:
     postgis_data:
         driver: local
