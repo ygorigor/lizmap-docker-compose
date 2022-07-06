@@ -59,7 +59,7 @@ services:
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis
-      QGSRV_SERVER_TIMEOUT: '80'
+      QGSRV_CACHE_CHECK_INTERVAL: '10'
       QGSRV_DISABLE_GETPRINT: '1'
       QGSRV_API_ENABLED_LANDING_PAGE: '1'
       QGSRV_TRUST_LAYER_METADATA: '1'
