@@ -3,7 +3,7 @@ services:
   lizmap:
     image: 3liz/lizmap-web-client:${LIZMAP_VERSION_TAG}
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      com.centurylinklabs.watchtower.enable: true
     container_name: lizmap
     environment:
       LIZMAP_CACHEREDISDB: '0'
@@ -41,6 +41,7 @@ services:
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin:/www/lizmap/lizmap-modules/altiProfilAdmin
       - ${LIZMAP_DIR}/../../lizmap-pgmetadata-module/pgmetadata:/www/lizmap/lizmap-modules/pgmetadata
       - ${LIZMAP_DIR}/../../lizmap-pgmetadata-module/pgmetadataAdmin:/www/lizmap/lizmap-modules/pgmetadataAdmin
+      - ${LIZMAP_DIR}/../../lizmap-wps-web-client-module/wps:/www/lizmap/lizmap-modules/wps
     command:
       - php-fpm
 #    depends_on:
@@ -50,8 +51,9 @@ services:
   map:
     image: 3liz/qgis-map-server:${QGIS_VERSION_TAG}
     labels: 
-      - com.centurylinklabs.watchtower.enable=true
-#      - com.centurylinklabs.watchtower.lifecycle.post-update=/srv/projects/install-lizmap-plugin.sh
+      com.centurylinklabs.watchtower.enable: true
+      com.centurylinklabs.watchtower.lifecycle.post-update: /srv/projects/install-lizmap-plugin.sh
+      com.centurylinklabs.watchtower.depends-on: docker_container
     container_name: map
     command: qgisserver -c /srv/etc/py-qgis-server.conf
     environment:
@@ -62,7 +64,7 @@ services:
       QGSRV_SERVER_WORKERS: ${QGIS_MAP_WORKERS}
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
-      QGSRV_SERVER_RESTARTMON: /srv/qgis-restart.txt
+      QGSRV_SERVER_RESTARTMON: /srv/projects/qgis-restart.txt
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass.conf
       QGIS_OPTIONS_PATH: /srv/etc/qgis
@@ -74,12 +76,13 @@ services:
       QGIS_SERVER_LIZMAP_REVEAL_SETTINGS: '1'
       QGIS_PLUGIN_MANAGER_SOURCES_FILE: /tmp/sources.list
       QGIS_PLUGIN_MANAGER_CACHE_DIR: /srv/plugins
+      QGIS_PLUGIN_MANAGER_RESTART_FILE: /srv/projects/qgis-restart.txt
     volumes:
       - ${LIZMAP_PROJECTS}:/srv/projects
 #      - ${LIZMAP_DIR}/plugins:/srv/plugins
       - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
-      - ${LIZMAP_PROJECTS}/qgis-restart.txt:/srv/qgis-restart.txt
+#      - ${LIZMAP_PROJECTS}/qgis-restart.txt:/srv/qgis-restart.txt
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     ports:
@@ -88,7 +91,7 @@ services:
   redis:
     image: redis:7-alpine
     labels: 
-      - com.centurylinklabs.watchtower.enable=true
+      com.centurylinklabs.watchtower.enable: true
     container_name: redis
     ports:
       - 6379:6379
@@ -99,7 +102,7 @@ services:
   web:
     image: nginx:alpine
     labels: 
-      - com.centurylinklabs.watchtower.enable=true
+      com.centurylinklabs.watchtower.enable: true
     container_name: web
 #    user: ${LIZMAP_UID}:${LIZMAP_UID}
     volumes:
@@ -148,7 +151,7 @@ services:
   postfix:
     image: juanluisbaptiste/postfix:latest
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      com.centurylinklabs.watchtower.enable: true
     container_name: mail
     environment:
       SMTP_SERVER: '192.168.2.8'
@@ -158,17 +161,17 @@ services:
       SERVER_HOSTNAME: 'snfr.md'
       SMTP_NETWORKS: '192.168.2.0/24'
       OVERWRITE_FROM: 'lizmap@snfr.md'
-      DEBUG: 'yes'
+      DEBUG: 'no'
     restart: unless-stopped
     volumes:
      - /etc/localtime:/etc/localtime:ro
      - /etc/timezone:/etc/timezone:ro
      - ${LIZMAP_DIR}/instances/mail_username.conf:/secret/mail_username.conf
      - ${LIZMAP_DIR}/instances/mail_password.conf:/secret/mail_password.conf
-  qgis-wps:
+  wps:
     image: 3liz/qgis-wps:ltr-rc
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      com.centurylinklabs.watchtower.enable: true
     container_name: wps
     environment:
       QGSWPS_SERVER_WORKDIR: /srv/data
@@ -179,29 +182,44 @@ services:
       QGSWPS_SERVER_WMS_SERVICE_URL:
       QGSWPS_PROCESSING_PROVIDERS: provider1,provider2
       QGSWPS_PROCESSING_PROVIDERS_MODULE_PATH: /processing
-      QGSWPS_CACHE_ROOTDIR: /projects
+      QGSWPS_CACHE_ROOTDIR: /srv/projects
       QGSWPS_USER: ${LIZMAP_UID}:${LIZMAP_GID}
     volumes:
       - ${LIZMAP_PROJECTS}/processing:/processing
-      - ${LIZMAP_PROJECTS}:/projects
+      - ${LIZMAP_PROJECTS}:/srv/projects
       - ${LIZMAP_DIR}/wps-data:/srv/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    ports:
+      - ${WPS_PORT}:8080
     restart: unless-stopped
   watchtower:
     image: containrrr/watchtower
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      com.centurylinklabs.watchtower.enable: true
     container_name: watchtower
     environment:
       WATCHTOWER_INCLUDE_STOPPED: 1
       WATCHTOWER_CLEANUP: 1
       WATCHTOWER_LABEL_ENABLE: 1
       WATCHTOWER_LIFECYCLE_HOOKS: 1
+      WATCHTOWER_REVIVE_STOPPED: 1
       WATCHTOWER_SCHEDULE: 0 0 6 * * *
-      WATCHTOWER_DEBUG: 1
+      WATCHTOWER_DEBUG: 0
     restart: unless-stopped
     volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+     - /etc/localtime:/etc/localtime:ro
+  docker:
+    image: docker:latest
+    command: sh /home/nqdi/lizmap-docker-compose/docker_container_entrypoint.sh
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      com.centurylinklabs.watchtower.depends-on: map
+    container_name: docker_container
+    restart: unless-stopped
+    volumes:
+     - ${LIZMAP_PROJECTS}/docker_container_entrypoint.sh:/home/nqdi/lizmap-docker-compose/docker_container_entrypoint.sh
      - /var/run/docker.sock:/var/run/docker.sock
      - /etc/localtime:/etc/localtime:ro
 
