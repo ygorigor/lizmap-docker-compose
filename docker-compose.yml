@@ -55,9 +55,9 @@ services:
       com.centurylinklabs.watchtower.lifecycle.post-update: /srv/projects/install-lizmap-plugin.sh
       com.centurylinklabs.watchtower.depends-on: docker_container
     container_name: map
-    command: qgisserver -c /srv/etc/py-qgis-server.conf
     environment:
       QGSRV_CACHE_SIZE: '50'
+      QGSRV_API_ENABLED_LIZMAP: 'yes'
       QGSRV_CACHE_ROOTDIR: /srv/projects
       QGSRV_USER: ${LIZMAP_UID}:${LIZMAP_GID}
       QGSRV_LOGGING_LEVEL: INFO
@@ -80,7 +80,6 @@ services:
     volumes:
       - ${LIZMAP_PROJECTS}:/srv/projects
 #      - ${LIZMAP_DIR}/plugins:/srv/plugins
-      - ${LIZMAP_DIR}/etc:/srv/etc:ro
       - ${LIZMAP_DIR}/wps-data:/srv/data
 #      - ${LIZMAP_PROJECTS}/qgis-restart.txt:/srv/qgis-restart.txt
       - /etc/localtime:/etc/localtime:ro
