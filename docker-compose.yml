@@ -44,9 +44,9 @@ services:
       - ${LIZMAP_DIR}/../../lizmap-wps-web-client-module/wps:/www/lizmap/lizmap-modules/wps
     command:
       - php-fpm
-#    depends_on:
-#      postgis:
-#        condition: service_healthy
+    depends_on:
+      postgis:
+        condition: service_healthy
     restart: unless-stopped
   map:
     image: 3liz/qgis-map-server:${QGIS_VERSION_TAG}
@@ -122,31 +122,37 @@ services:
     depends_on:
       - lizmap
     restart: unless-stopped
-#  postgis:
-#    image: 3liz/postgis:${POSTGIS_VERSION}
-#    labels:
-#      - com.centurylinklabs.watchtower.enable=true
-#    container_name: postgis
-#    volumes:
-#      - postgis_data:/var/lib/postgresql/data
+  postgis:
+    image: ${POSTGIS_IMAGE}
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+    container_name: postgis
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
 #      - ${LIZMAP_DIR}/etc/postgres.init.d:/docker-entrypoint-initdb.d
-#    environment:
-#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ${LIZMAP_DIR}/../../mobil-celular:/home/nqdi/mobil-celular
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 #      POSTGRES_LIZMAP_DB: ${POSTGRES_LIZMAP_DB}
 #      POSTGRES_LIZMAP_USER: ${POSTGRES_LIZMAP_USER}
 #      POSTGRES_LIZMAP_PASSWORD: ${POSTGRES_LIZMAP_PASSWORD}
-#    ports:
-#      - ${POSTGIS_PORT}:5432
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_LIZMAP_DB} -q || exit 1"]
-#      interval: 10s
-#      timeout: 5s
-#      start_period: 60s
-#    networks:
-#      default:
+      LANG: ro_RO.utf8
+      LC_COLLATE: C
+      TZ: Europe/Chisinau
+    ports:
+      - ${POSTGIS_PORT}:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB} -q || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+    networks:
+      default:
 #       aliases:
 #          - ${POSTGIS_ALIAS}
-#    restart: unless-stopped
+    restart: unless-stopped
   postfix:
     image: juanluisbaptiste/postfix:latest
     labels:
@@ -221,6 +227,18 @@ services:
      - ${LIZMAP_PROJECTS}/docker_container_entrypoint.sh:/home/nqdi/lizmap-docker-compose/docker_container_entrypoint.sh
      - /var/run/docker.sock:/var/run/docker.sock
      - /etc/localtime:/etc/localtime:ro
+#  pgagent:
+#    image: ${PGAGENT_IMAGE}
+#    labels:
+#     com.centurylinklabs.watchtower.enable: true
+#    container_name: pgagent
+#    restart: unless-stopped
+#    environment:
+#      VAR_FINAL_COMMAND: "/usr/local/bin/pgagent -f host=${VAR_HOSTADDR} dbname=${VAR_DBNAME} user=${VAR_USER} password=${POSTGRES_PASSWORD}"
+#      VAR_password_postgres: ${POSTGRES_PASSWORD}
+#    volumes:
+#     - /etc/localtime:/etc/localtime:ro
+#     - /etc/timezone:/etc/timezone:ro
 
 volumes:
     postgis_data:
