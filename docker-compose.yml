@@ -197,15 +197,13 @@ services:
   docker_container:
     image: docker:latest
     command: sh /home/nqdi/lizmap-docker-compose/docker_container_entrypoint.sh
-    labels:
-      com.centurylinklabs.watchtower.enable: true
-      com.centurylinklabs.watchtower.depends-on: map
     container_name: docker_container
     restart: unless-stopped
     volumes:
      - ${LIZMAP_PROJECTS}/docker_container_entrypoint.sh:/home/nqdi/lizmap-docker-compose/docker_container_entrypoint.sh
      - /var/run/docker.sock:/var/run/docker.sock
      - /etc/localtime:/etc/localtime:ro
+     - /etc/passwd:/etc/passwd:ro
     depends_on:
       postgis:
         condition: service_healthy
