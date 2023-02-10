@@ -2,8 +2,6 @@ version: '3.8'
 services:
   lizmap:
     image: 3liz/lizmap-web-client:${LIZMAP_VERSION_TAG}
-    labels:
-      com.centurylinklabs.watchtower.enable: true
     container_name: lizmap
     environment:
       LIZMAP_CACHEREDISDB: '0'
@@ -48,21 +46,18 @@ services:
     restart: unless-stopped
   map:
     image: 3liz/qgis-map-server:${QGIS_VERSION_TAG}
-    labels: 
-      com.centurylinklabs.watchtower.enable: true
-      com.centurylinklabs.watchtower.lifecycle.post-update: /srv/projects/install-lizmap-plugin.sh
-      com.centurylinklabs.watchtower.depends-on: docker_container
     container_name: map
     environment:
       QGSRV_CACHE_SIZE: '50'
       QGSRV_API_ENABLED_LIZMAP: 'yes'
       QGSRV_CACHE_ROOTDIR: /srv/projects
       QGSRV_USER: ${LIZMAP_UID}:${LIZMAP_GID}
-      QGSRV_LOGGING_LEVEL: ERROR
+      QGSRV_LOGGING_LEVEL: INFO
       QGSRV_SERVER_WORKERS: ${QGIS_MAP_WORKERS}
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       QGSRV_SERVER_RESTARTMON: /srv/projects/qgis-restart.txt
+      QGSRV_CACHE_CHECK_INTERVAL: '60'
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass
       QGIS_OPTIONS_PATH: /srv/etc/qgis
@@ -87,8 +82,6 @@ services:
         condition: service_healthy
   redis:
     image: redis:7-alpine
-    labels: 
-      com.centurylinklabs.watchtower.enable: true
     container_name: redis
     ports:
       - 6379:6379
@@ -98,9 +91,6 @@ services:
     restart: unless-stopped
   web:
     image: nginx:alpine
-    labels: 
-      com.centurylinklabs.watchtower.enable: true
-      com.centurylinklabs.watchtower.depends-on: lizmap
     container_name: web
 #    user: ${LIZMAP_UID}:${LIZMAP_UID}
     volumes:
@@ -123,10 +113,6 @@ services:
     restart: unless-stopped
   postgis:
     image: ${POSTGIS_IMAGE}
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - com.centurylinklabs.watchtower.depends-on=docker_container
-      - com.centurylinklabs.watchtower.stop-signal=SIGINT
     container_name: postgis
     volumes:
       - postgis_data:/var/lib/postgresql/data
@@ -154,8 +140,6 @@ services:
     restart: unless-stopped
   postfix:
     image: juanluisbaptiste/postfix:latest
-    labels:
-      com.centurylinklabs.watchtower.enable: true
     container_name: postfix
     environment:
       SMTP_SERVER: ${POSTFIX_SMTP_SERVER}
@@ -172,10 +156,10 @@ services:
      - /etc/timezone:/etc/timezone:ro
      - ${LIZMAP_DIR}/instances/mail_username.conf:/secret/mail_username.conf
      - ${LIZMAP_DIR}/instances/mail_password.conf:/secret/mail_password.conf
+    ports:
+     - 25:25
   wps:
     image: 3liz/qgis-wps:ltr-rc
-    labels:
-      com.centurylinklabs.watchtower.enable: true
     container_name: wps
     environment:
       QGSWPS_SERVER_WORKDIR: /srv/data
@@ -197,30 +181,19 @@ services:
     ports:
       - ${WPS_PORT}:8080
     restart: unless-stopped
-  watchtower:
-    image: containrrr/watchtower
-    labels:
-      com.centurylinklabs.watchtower.enable: true
-    container_name: watchtower
-    environment:
-      WATCHTOWER_INCLUDE_STOPPED: 1
-      WATCHTOWER_CLEANUP: 1
-      WATCHTOWER_LABEL_ENABLE: 1
-      WATCHTOWER_LIFECYCLE_HOOKS: 1
-      WATCHTOWER_REVIVE_STOPPED: 1
-      WATCHTOWER_SCHEDULE: 0 0 6 * * *
-      WATCHTOWER_DEBUG: 0
-      WATCHTOWER_TIMEOUT: 30s
-      WATCHTOWER_NOTIFICATIONS: email
-      WATCHTOWER_NOTIFICATION_EMAIL_FROM: ${WATCHTOWER_NOTIFICATION_EMAIL_FROM}
-      WATCHTOWER_NOTIFICATION_EMAIL_TO: ${WATCHTOWER_NOTIFICATION_EMAIL_TO}
-      WATCHTOWER_NOTIFICATION_EMAIL_SERVER: postfix
-      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT: 25
-      WATCHTOWER_NOTIFICATION_EMAIL_DELAY: 2
-    restart: unless-stopped
+  pgagent:
+    image: pgagent:latest
+    container_name: pgagent
+    entrypoint: /bin/sh -c
+                "tmp/wait-for-it.sh postgis:5432 --timeout=30 &&
+                PGPASSWORD=${POSTGRES_PASSWORD} pgagent -f host=postgis dbname=postgres user=postgres port=${POSTGIS_PORT}"
     volumes:
-     - /var/run/docker.sock:/var/run/docker.sock
-     - /etc/localtime:/etc/localtime:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    restart: unless-stopped
+    depends_on:
+      postgis:
+        condition: service_healthy
   docker_container:
     image: docker:latest
     command: sh /home/nqdi/lizmap-docker-compose/docker_container_entrypoint.sh
