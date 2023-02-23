@@ -57,12 +57,14 @@ services:
       QGSRV_SERVER_PLUGINPATH: /srv/plugins
       QGSRV_CACHE_PRELOAD_CONFIG: /srv/projects/projects.conf
       QGSRV_SERVER_RESTARTMON: /srv/projects/qgis-restart.txt
+      QGSRV_DISABLE_GETPRINT: 'yes'
+      QGSRV_TRUST_LAYER_METADATA: 'yes'
       QGSRV_CACHE_CHECK_INTERVAL: '60'
+      QGSRV_CACHE_STRICT_CHECK: 'no'
+      QGSRV_SERVER_TIMEOUT: '40'
       PGSERVICEFILE: /srv/etc/pg_service.conf
       PGSPASSFILE: /srv/etc/pgpass
       QGIS_OPTIONS_PATH: /srv/etc/qgis
-      QGSRV_DISABLE_GETPRINT: 'yes'
-      QGSRV_TRUST_LAYER_METADATA: 'yes'
       QGIS_SERVER_PARALLEL_RENDERING: '1'
       QGIS_SERVER_LIZMAP_REVEAL_SETTINGS: '1'
       QGIS_PLUGIN_MANAGER_SOURCES_FILE: /tmp/sources.list
@@ -148,7 +150,7 @@ services:
       SMTP_PASSWORD_FILE: /secret/mail_password.conf
       SERVER_HOSTNAME: ${POSTFIX_SERVER_HOSTNAME}
       SMTP_NETWORKS: ${POSTFIX_SMTP_NETWORKS}
-      OVERWRITE_FROM: ${POSTFIX_OVERWRITE_FROM}
+#      OVERWRITE_FROM: ${POSTFIX_OVERWRITE_FROM}
       DEBUG: 'no'
     restart: unless-stopped
     volumes:
