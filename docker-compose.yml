@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 services:
   lizmap:
     image: 3liz/lizmap-web-client:${LIZMAP_VERSION_TAG}
@@ -23,22 +23,22 @@ services:
       PM_MAX_REQUESTS: '0'
       PM_PROCESS_IDLE_TIMEOUT: '10'
     volumes:
-      - ${LIZMAP_PROJECTS}:/srv/projects
-      - ${LIZMAP_DIR}/var/lizmap-theme-config:/www/lizmap/var/lizmap-theme-config
-      - ${LIZMAP_DIR}/var/lizmap-config:/www/lizmap/var/config
-      - ${LIZMAP_DIR}/var/lizmap-db:/www/lizmap/var/db
-      - ${LIZMAP_DIR}/www:/www/lizmap/www
-      - ${LIZMAP_DIR}/www/var/log:/www/lizmap/var/log
-      - ${LIZMAP_DIR}/var/lizmap-modules:/www/lizmap/lizmap-modules
-      - ${LIZMAP_DIR}/var/lizmap-my-packages:/www/lizmap/my-packages
-      - ${LIZMAP_DIR}/etc:/srv/etc:ro
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-      - ${LIZMAP_DIR}/etc/php_customconfig.ini:/etc/php7/conf.d/php_customconfig.ini
-      - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfil:/www/lizmap/lizmap-modules/altiProfil
-      - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin:/www/lizmap/lizmap-modules/altiProfilAdmin
-      - ${LIZMAP_DIR}/../../lizmap-wps-web-client-module/wps:/www/lizmap/lizmap-modules/wps
-      - ${ATDI_ATTACH}:/srv/projects/media/doc
+      - { type: bind, source: "${LIZMAP_PROJECTS}", target: /srv/projects }
+      - { type: bind, source: "${LIZMAP_DIR}/var/lizmap-theme-config", target: /www/lizmap/var/lizmap-theme-config }
+      - { type: bind, source: "${LIZMAP_DIR}/var/lizmap-config", target: /www/lizmap/var/config }
+      - { type: bind, source: "${LIZMAP_DIR}/var/lizmap-db",     target: /www/lizmap/var/db }
+      - { type: bind, source: "${LIZMAP_DIR}/www", target: /www/lizmap/www }
+      - { type: bind, source: "${LIZMAP_DIR}/www/var/log", target: /www/lizmap/var/log }
+      - { type: bind, source: "${LIZMAP_DIR}/var/lizmap-modules", target: /www/lizmap/lizmap-modules }
+      - { type: bind, source: "${LIZMAP_DIR}/var/lizmap-my-packages", target: /www/lizmap/my-packages }
+      - { type: bind, source: "${LIZMAP_DIR}/etc", target: /srv/etc, read_only: true }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/php_customconfig.ini", target: /etc/php7/conf.d/php_customconfig.ini }
+      - { type: bind, source: "${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfil", target: /www/lizmap/lizmap-modules/altiProfil }
+      - { type: bind, source: "${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin", target: /www/lizmap/lizmap-modules/altiProfilAdmin }
+      - { type: bind, source: "${LIZMAP_DIR}/../../lizmap-wps-web-client-module/wps", target: /www/lizmap/lizmap-modules/wps }
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
+      - { type: bind, source: "${ATDI_ATTACH}", target: /srv/projects/media/doc }
     command:
       - php-fpm
     depends_on:
@@ -73,11 +73,11 @@ services:
       QGIS_PLUGIN_MANAGER_CACHE_DIR: /srv/plugins
       QGIS_PLUGIN_MANAGER_RESTART_FILE: /srv/projects/qgis-restart.txt
     volumes:
-      - ${LIZMAP_PROJECTS}:/srv/projects
-      - ${LIZMAP_DIR}/wps-data:/srv/data
-      - ${LIZMAP_DIR}/etc:/srv/etc
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      - { type: bind, source: "${LIZMAP_PROJECTS}", target: /srv/projects }
+      - { type: bind, source: "${LIZMAP_DIR}/wps-data", target: /srv/data }
+      - { type: bind, source: "${LIZMAP_DIR}/etc", target: /srv/etc }
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
     ports:
       - ${OWS_PORT}:8080
     restart: unless-stopped
@@ -90,25 +90,26 @@ services:
     ports:
       - 6379:6379
     volumes:
-     - redis_data:/data
-     - /etc/localtime:/etc/localtime:ro
+      - { type: volume, source: redis_data, target: /data }
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
     restart: unless-stopped
   web:
     image: nginx:alpine
     container_name: web
 #    user: ${LIZMAP_UID}:${LIZMAP_UID}
     volumes:
-      - ${LIZMAP_DIR}/etc/nginx.conf:/etc/nginx/nginx.conf
-#      - ${LIZMAP_DIR}/var/log/nginx:/var/log/nginx
-#      - ${LIZMAP_DIR}/var/nginx-cache:/var/cache/nginx
-      - ${LIZMAP_DIR}:/srv/lizmap
-      - ${LIZMAP_DIR}/etc/self-signed.conf:/etc/nginx/self-signed.conf
-      - ${LIZMAP_DIR}/etc/ssl-params.conf:/etc/nginx/ssl-params.conf
-      - ${LIZMAP_DIR}/etc/nginx-selfsigned.crt:/etc/nginx/nginx-selfsigned.crt
-      - ${LIZMAP_DIR}/etc/nginx-selfsigned.key:/etc/nginx/nginx-selfsigned.key
-      - ${LIZMAP_DIR}/etc/dhparam.pem:/etc/nginx/dhparam.pem
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      - { type: bind, source: "${LIZMAP_DIR}/etc/nginx.conf", target: /etc/nginx/nginx.conf }
+      - { type: bind, source: "${LIZMAP_DIR}/var/log/nginx", target: /var/log/nginx }
+      - { type: bind, source: "${LIZMAP_DIR}/var/nginx-cache", target: /var/cache/nginx }
+      - { type: bind, source: "${LIZMAP_DIR}", target: /srv/lizmap }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/self-signed.conf", target:/etc/nginx/self-signed.conf }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/ssl-params.conf", target:/etc/nginx/ssl-params.conf }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/nginx-selfsigned.crt", target:/etc/nginx/nginx-selfsigned.crt }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/nginx-selfsigned.key", target:/etc/nginx/nginx-selfsigned.key }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/dhparam.pem", target:/etc/nginx/dhparam.pem }
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
     ports:
       - ${LIZMAP_PORT}:8080
       - ${LIZMAP_HTTPS_PORT}:443
@@ -119,12 +120,12 @@ services:
     image: ${POSTGIS_IMAGE}
     container_name: postgis
     volumes:
-      - postgis_data:/var/lib/postgresql/data
-#      - ${LIZMAP_DIR}/etc/postgres.init.d:/docker-entrypoint-initdb.d
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-      - ${LIZMAP_DIR}/../../OneDrive/Bazele de date mobil-celular/celule:/home/nqdi/mobil-celular
-      - ${LIZMAP_DIR}/etc:/srv/etc:ro
+      - { type: volume, source: postgis_data, target: /var/lib/postgresql/data }
+#      - { type: bind, source: "${LIZMAP_DIR}/etc/postgres.init.d", target: /docker-entrypoint-initdb.d }
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
+      - { type: bind, source: "${LIZMAP_DIR}/../../OneDrive/Bazele de date mobil-celular/celule", target: /home/nqdi/mobil-celular }
+      - { type: bind, source: "${LIZMAP_DIR}/etc", target: /srv/etc, read_only: true }
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGSERVICEFILE: /srv/etc/pg_service.conf
@@ -156,10 +157,10 @@ services:
       DEBUG: 'no'
     restart: unless-stopped
     volumes:
-     - /etc/localtime:/etc/localtime:ro
-     - /etc/timezone:/etc/timezone:ro
-     - ${LIZMAP_DIR}/instances/mail_username.conf:/secret/mail_username.conf
-     - ${LIZMAP_DIR}/instances/mail_password.conf:/secret/mail_password.conf
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
+      - { type: bind, source: "${LIZMAP_DIR}/instances/mail_username.conf", target: /secret/mail_username.conf }
+      - { type: bind, source: "${LIZMAP_DIR}/instances/mail_password.conf", target: /secret/mail_password.conf }
     ports:
      - 25:25
   wps:
@@ -177,11 +178,11 @@ services:
       QGSWPS_CACHE_ROOTDIR: /srv/projects
       QGSWPS_USER: ${LIZMAP_UID}:${LIZMAP_GID}
     volumes:
-      - ${LIZMAP_PROJECTS}/processing:/processing
-      - ${LIZMAP_PROJECTS}:/srv/projects
-      - ${LIZMAP_DIR}/wps-data:/srv/data
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      - { type: bind, source: "${LIZMAP_PROJECTS}/processing", target: /processing }
+      - { type: bind, source: "${LIZMAP_PROJECTS}", target: /srv/projects }
+      - { type: bind, source: "${LIZMAP_DIR}/wps-data", target: /srv/data }
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
     ports:
       - ${WPS_PORT}:8080
     restart: unless-stopped
@@ -192,8 +193,8 @@ services:
                 "tmp/wait-for-it.sh postgis:5432 --timeout=30 &&
                 PGPASSWORD=${POSTGRES_PASSWORD} pgagent -f host=postgis dbname=postgres user=postgres port=${POSTGIS_PORT}"
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
     restart: unless-stopped
     depends_on:
       postgis:
@@ -204,10 +205,10 @@ services:
     container_name: docker_container
     restart: unless-stopped
     volumes:
-     - ${LIZMAP_PROJECTS}/docker_container_entrypoint.sh:/home/nqdi/lizmap-docker-compose/docker_container_entrypoint.sh
-     - /var/run/docker.sock:/var/run/docker.sock
-     - /etc/localtime:/etc/localtime:ro
-     - /etc/passwd:/etc/passwd:ro
+      - { type: bind, source: "${LIZMAP_PROJECTS}/docker_container_entrypoint.sh", target: /home/nqdi/lizmap-docker-compose/docker_container_entrypoint.sh }
+      - { type: bind, source: "/var/run/docker.sock", target: /var/run/docker.sock }
+      - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
+      - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
     depends_on:
      - map
 
