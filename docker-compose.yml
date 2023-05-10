@@ -38,6 +38,7 @@ services:
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfil:/www/lizmap/lizmap-modules/altiProfil
       - ${LIZMAP_DIR}/../../lizmap-altiProfil/altiProfilAdmin:/www/lizmap/lizmap-modules/altiProfilAdmin
       - ${LIZMAP_DIR}/../../lizmap-wps-web-client-module/wps:/www/lizmap/lizmap-modules/wps
+      - ${ATDI_ATTACH}:/srv/projects/media/doc
     command:
       - php-fpm
     depends_on:
@@ -64,9 +65,9 @@ services:
       QGSRV_DISABLE_GETPRINT: 'yes'
       QGSRV_TRUST_LAYER_METADATA: 'yes'
       QGSRV_CACHE_CHECK_INTERVAL: '60'
-      QGSRV_CACHE_STRICT_CHECK: 'no'
       QGSRV_SERVER_TIMEOUT: '40'
       QGSRV_SERVER_RESTARTMON: /srv/projects/qgis-restart.txt
+      QGSRV_DISPLAY_XVFB: 'OFF'
       QGIS_SERVER_PARALLEL_RENDERING: '1'
       QGIS_PLUGIN_MANAGER_SOURCES_FILE: /tmp/sources.list
       QGIS_PLUGIN_MANAGER_CACHE_DIR: /srv/plugins
@@ -208,8 +209,7 @@ services:
      - /etc/localtime:/etc/localtime:ro
      - /etc/passwd:/etc/passwd:ro
     depends_on:
-      postgis:
-        condition: service_healthy
+     - map
 
 volumes:
     postgis_data:
