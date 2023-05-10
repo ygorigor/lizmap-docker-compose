@@ -103,11 +103,11 @@ services:
       - { type: bind, source: "${LIZMAP_DIR}/var/log/nginx", target: /var/log/nginx }
       - { type: bind, source: "${LIZMAP_DIR}/var/nginx-cache", target: /var/cache/nginx }
       - { type: bind, source: "${LIZMAP_DIR}", target: /srv/lizmap }
-      - { type: bind, source: "${LIZMAP_DIR}/etc/self-signed.conf", target:/etc/nginx/self-signed.conf }
-      - { type: bind, source: "${LIZMAP_DIR}/etc/ssl-params.conf", target:/etc/nginx/ssl-params.conf }
-      - { type: bind, source: "${LIZMAP_DIR}/etc/nginx-selfsigned.crt", target:/etc/nginx/nginx-selfsigned.crt }
-      - { type: bind, source: "${LIZMAP_DIR}/etc/nginx-selfsigned.key", target:/etc/nginx/nginx-selfsigned.key }
-      - { type: bind, source: "${LIZMAP_DIR}/etc/dhparam.pem", target:/etc/nginx/dhparam.pem }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/self-signed.conf", target: /etc/nginx/self-signed.conf }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/ssl-params.conf", target: /etc/nginx/ssl-params.conf }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/nginx-selfsigned.crt", target: /etc/nginx/nginx-selfsigned.crt }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/nginx-selfsigned.key", target: /etc/nginx/nginx-selfsigned.key }
+      - { type: bind, source: "${LIZMAP_DIR}/etc/dhparam.pem", target: /etc/nginx/dhparam.pem }
       - { type: bind, source: "/etc/localtime", target: /etc/localtime, read_only: true }
       - { type: bind, source: "/etc/timezone", target: /etc/timezone, read_only: true }
     ports:
